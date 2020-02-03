@@ -42,6 +42,7 @@ import java.util.Date;
 public class Emp {
     @Column
     @Id
+    @GeneratedValue
     @MgmtColumn(width=10, show=true, form=false, edit=false)
     private int empId;
     @Column

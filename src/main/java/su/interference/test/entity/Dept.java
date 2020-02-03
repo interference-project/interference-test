@@ -41,7 +41,7 @@ import javax.persistence.Table;
 public class Dept {
     @Column
     @Id
-    //@GeneratedValue
+    @GeneratedValue
     @MgmtColumn(width=10, show=true, form=false, edit=false)
     private int deptId;
     @Column
