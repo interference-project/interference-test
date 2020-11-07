@@ -1,7 +1,7 @@
 /**
 The MIT License (MIT)
 
-Copyright (c) 2010-2016 interference
+Copyright (c) 2010-2020 interference
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -25,7 +25,6 @@ package su.interference.test;
 
 import su.interference.core.Instance;
 import su.interference.persistent.Session;
-import su.interference.persistent.Table;
 import su.interference.proxy.GenericResult;
 import su.interference.sql.ResultSet;
 import su.interference.sql.StreamQueue;
@@ -36,8 +35,6 @@ import su.interference.test.entity.StreamTable;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -62,10 +59,16 @@ public class InterferenceTest implements InterferenceTestMBean {
         System.in.read();
     }
 
+    /*
+        use JConsole for access to JMX bean
+    */
     public static void main(String[] args) throws Exception {
         InterferenceTest test = new InterferenceTest();
     }
 
+    /*
+        startup instance
+    */
     public void startup() {
         try {
             instance = Instance.getInstance();
@@ -98,44 +101,57 @@ public class InterferenceTest implements InterferenceTestMBean {
         instance.shutdownInstance();
     }
 
-    public void loadData() throws Exception {
+    /*
+        load 100000 records of random test data to both Dept and Emp tables
+    */
+    public void loadData() {
         try {
-            for (int i = 1; i <= 10000; i++) {
-                Dept d = (Dept) session.newEntity(Dept.class, new Object[]{0, "Department N"+i, "abcdefghijklmn "+i});
-                Emp e = (Emp) session.newEntity(Emp.class, new Object[]{0, "John Doe "+i, d.getDeptId(session), "Sales manager "+i, 43286 + i, new Date()});
+            for (int i = 1; i <= 100000; i++) {
+                Dept d = (Dept) session.newEntity(Dept.class, new Object[]{});
+                Emp e = (Emp) session.newEntity(Emp.class, new Object[]{});
+                d.setDeptId(i, session);
+                d.setDeptName("Department "+i, session);
+                d.setDescript("abcdefghijklmn "+i, session);
+                e.setEmpId(i, session);
+                e.setDeptId(i, session);
+                e.setEmpName("John Doe "+i, session);
+                e.setDescript("abcdefghijklmn "+i, session);
                 session.persist(d);
                 session.persist(e);
             }
-            System.out.println("10000 records updated");
+            session.commit();
+            System.out.println("200000 records inserted in both tables");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // execute query in insert/update session
+    /*
+        execute query in insert/update session
+    */
     public void executeQuery() throws Exception {
         ResultSet rs = session.execute("select d.deptName, e.empName, e.descript " +
-                "from su.interference.test.entity.Dept d, " +
-                "su.interference.test.entity.Emp e " +
+                "from su.interference.test.entity.Dept d, su.interference.test.entity.Emp e " +
                 "where d.deptId = e.deptId");
         Object o  = rs.poll(session);
         while (o != null) {
             final GenericResult r = (GenericResult) o;
-            System.out.println((String)r.getValueByName("ddeptName") + ":" + (String)r.getValueByName("eempName") + ":" + (String)r.getValueByName("edescript"));
+            System.out.println(r.getValueByName("ddeptName") + ":" + r.getValueByName("eempName") + ":" + r.getValueByName("edescript"));
             o = rs.poll(session);
         }
     }
 
-    // execute query in another session
+    /*
+        execute query in another session
+    */
     public void executeQuery2() throws Exception {
         ResultSet rs = session2.execute("select d.deptName, e.empName, e.descript " +
-                "from su.interference.test.entity.Dept d, " +
-                "su.interference.test.entity.Emp e " +
+                "from su.interference.test.entity.Dept d, su.interference.test.entity.Emp e " +
                 "where d.deptId = e.deptId");
         Object o  = rs.poll(session2);
         while (o != null) {
             final GenericResult r = (GenericResult) o;
-            System.out.println((String)r.getValueByName("ddeptName") + ":" + (String)r.getValueByName("eempName") + ":" + (String)r.getValueByName("edescript"));
+            System.out.println(r.getValueByName("ddeptName") + ":" + r.getValueByName("eempName") + ":" + r.getValueByName("edescript"));
             o = rs.poll(session2);
         }
     }
@@ -146,39 +162,47 @@ public class InterferenceTest implements InterferenceTestMBean {
         Object o  = rs.poll(session2);
         while (o != null) {
             final GenericResult r = (GenericResult) o;
-            System.out.println((String)r.getValueByName("ddeptName"));
+            System.out.println(r.getValueByName("ddeptName"));
             o = rs.poll(session2);
         }
     }
 
+    /*
+        simply update of all records in Dept
+    */
     public void updateDept() throws Exception {
         if (session != null) {
-            Table t = Instance.getInstance().getTableByName(Dept.class.getName());
-            session.startStatement();
-            Dept d = (Dept) t.poll(session);
-            int i = 0;
-            while (d != null) {
-                i++;
-                d.setDeptName("Outdoor staff", session);
-                session.persist(d);
-                d = (Dept) t.poll(session);
+            for (int id = 1; id <= 100000; id++) {
+                Dept dept = (Dept) session.find(Dept.class, id);
+                dept.setDeptName("Outdoor staff", session);
+                session.persist(dept);
             }
-            System.out.println(i+" records updated");
         }
     }
 
-    public void findDeptById(int id) throws Exception {
-        if (session2 == null) {
-            session2 = Session.getSession();
+    /*
+        find() method use indices for fast data access
+    */
+    public void findDepts() throws Exception {
+        for (int id = 1; id <= 100000; id++) {
+            Dept dept = (Dept) session.find(Dept.class, id);
+            System.out.println(dept.getDeptName(session));
         }
-        dept = (Dept)session2.find(Dept.class, id);
     }
 
-    public void printDeptName() throws  Exception {
-        System.out.println("deptName = " + dept.getDeptName(session2));
+    /*
+        find() method use indices for fast data access
+    */
+    public void findDeptsInAnotherSession() throws Exception {
+        for (int id = 1; id <= 100000; id++) {
+            Dept dept = (Dept) session2.find(Dept.class, id);
+            System.out.println(dept.getDeptName(session2));
+        }
     }
 
-    // start stream with simple condition
+    /*
+        start stream with simple condition
+    */
     public void executeStream() throws Exception {
         exec.submit(new Runnable() {
             @Override
@@ -203,7 +227,9 @@ public class InterferenceTest implements InterferenceTestMBean {
         });
     }
 
-    // start stream with tumbling window groups
+    /*
+        start stream with tumbling window groups
+    */
     public void executeStream2() throws Exception {
         exec.submit(new Runnable() {
             @Override
@@ -228,7 +254,9 @@ public class InterferenceTest implements InterferenceTestMBean {
         });
     }
 
-    // start stream with sliding window groups
+    /*
+        start stream with sliding window groups
+    */
     public void executeStream3() throws Exception {
         exec.submit(new Runnable() {
             @Override
@@ -253,7 +281,9 @@ public class InterferenceTest implements InterferenceTestMBean {
         });
     }
 
-    // insert 10000 records to stream
+    /*
+        insert 10000 records to stream
+    */
     public void insertStream() {
         for (int i=0; i<100; i++) {
             for (int j=0; j<100; j++) {
@@ -272,21 +302,27 @@ public class InterferenceTest implements InterferenceTestMBean {
         System.out.println("10000 record(s) inserts to stream");
     }
 
-    // close last started stream
+    /*
+        close last started stream
+    */
     public void closeStream() {
         if (streamRS != null) {
             ((StreamQueue)streamRS).stop();
         }
     }
 
-    // commit transaction
+    /*
+        commit transaction
+    */
     public void commit() throws Exception {
         if (session != null) {
             session.commit();
         }
     }
 
-    // rollback transaction
+    /*
+        rollback transaction
+    */
     public void rollback() throws Exception {
         if (session != null) {
             session.rollback();

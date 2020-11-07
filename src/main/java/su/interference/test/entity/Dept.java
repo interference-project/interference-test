@@ -1,7 +1,7 @@
 /**
  The MIT License (MIT)
 
- Copyright (c) 2010-2019 head systems, ltd
+ Copyright (c) 2010-2020 head systems, ltd
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in
@@ -24,10 +24,7 @@
 
 package su.interference.test.entity;
 
-import su.interference.exception.CannotAccessToLockedRecord;
-import su.interference.mgmt.MgmtColumn;
 import su.interference.persistent.Session;
-
 import javax.persistence.*;
 import javax.persistence.Table;
 
@@ -41,31 +38,21 @@ import javax.persistence.Table;
 public class Dept {
     @Column
     @Id
-    @GeneratedValue
-    @MgmtColumn(width=10, show=true, form=false, edit=false)
     private int deptId;
     @Column
-    @MgmtColumn(width=40, show=true, form=true, edit=true)
     private String deptName;
     @Column
-    @MgmtColumn(width=50, show=true, form=false, edit=true)
     private String descript;
 
     public Dept() {
 
     }
 
-    public Dept(java.lang.Integer id, String name, String desc) {
-        this.deptId   = id;
-        this.deptName = name;
-        this.descript = desc;
-    }
-
     public int getDeptId(Session s) {
         return deptId;
     }
 
-    public void setDeptId(int deptId, Session s) throws CannotAccessToLockedRecord {
+    public void setDeptId(int deptId, Session s) {
         this.deptId = deptId;
     }
 
@@ -73,7 +60,7 @@ public class Dept {
         return deptName;
     }
 
-    public void setDeptName(String deptName, Session s) throws CannotAccessToLockedRecord {
+    public void setDeptName(String deptName, Session s) {
         this.deptName = deptName;
     }
 
@@ -81,7 +68,7 @@ public class Dept {
         return descript;
     }
 
-    public void setDescript(String descript, Session s) throws CannotAccessToLockedRecord {
+    public void setDescript(String descript, Session s) {
         this.descript = descript;
     }
 

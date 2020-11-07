@@ -1,7 +1,7 @@
 /**
  The MIT License (MIT)
 
- Copyright (c) 2010-2019 head systems, ltd
+ Copyright (c) 2010-2020 head systems, ltd
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in
@@ -24,10 +24,7 @@
 
 package su.interference.test.entity;
 
-import su.interference.exception.CannotAccessToLockedRecord;
-import su.interference.mgmt.MgmtColumn;
 import su.interference.persistent.Session;
-
 import javax.persistence.*;
 
 /**
@@ -41,13 +38,10 @@ public class StreamTable {
     @Column
     @Id
     @GeneratedValue
-    @MgmtColumn(width=10, show=true, form=false, edit=false)
     private int id;
     @Column
-    @MgmtColumn(width=40, show=true, form=true, edit=true)
     private String name;
     @Column
-    @MgmtColumn(width=50, show=true, form=false, edit=true)
     private String descript;
 
     public StreamTable() {
@@ -64,7 +58,7 @@ public class StreamTable {
         return id;
     }
 
-    public void setId(int id, Session s) throws CannotAccessToLockedRecord {
+    public void setId(int id, Session s) {
         this.id = id;
     }
 
@@ -72,7 +66,7 @@ public class StreamTable {
         return name;
     }
 
-    public void setName(String name, Session s) throws CannotAccessToLockedRecord {
+    public void setName(String name, Session s) {
         this.name = name;
     }
 
@@ -80,7 +74,7 @@ public class StreamTable {
         return descript;
     }
 
-    public void setDescript(String descript, Session s) throws CannotAccessToLockedRecord {
+    public void setDescript(String descript, Session s) {
         this.descript = descript;
     }
 

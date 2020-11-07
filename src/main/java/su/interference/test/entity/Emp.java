@@ -1,7 +1,7 @@
 /**
  The MIT License (MIT)
 
- Copyright (c) 2010-2019 head systems, ltd
+ Copyright (c) 2010-2020 head systems, ltd
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in
@@ -24,8 +24,6 @@
 
 package su.interference.test.entity;
 
-import su.interference.mgmt.MgmtColumn;
-import su.interference.exception.CannotAccessToLockedRecord;
 import su.interference.persistent.Session;
 
 import javax.persistence.*;
@@ -38,47 +36,29 @@ import java.util.Date;
  */
 
 @Entity
-@Table(name="Emp", indexes={@Index(name="EmpDeptKey", columnList="deptId", unique=false)})
+@Table(name="Emp", indexes={@Index(name="EmpPk", columnList="empId", unique=true),@Index(name="EmpDeptKey", columnList="deptId", unique=false)})
 public class Emp {
     @Column
     @Id
-    @GeneratedValue
-    @MgmtColumn(width=10, show=true, form=false, edit=false)
     private int empId;
     @Column
-    @MgmtColumn(width=40, show=true, form=true, edit=true)
     private String empName;
     @Column
-    @MgmtColumn(width=50, show=true, form=false, edit=true)
     private int deptId;
     @Column
-    @MgmtColumn(width=10, show=true, form=false, edit=true)
-    private int empCode;
-    @Column
-    @MgmtColumn(width=50, show=true, form=false, edit=true)
     private String descript;
     @Column
-    @MgmtColumn(width=50, show=true, form=false, edit=true)
     private Date createDate;
 
     public Emp () {
 
     }
 
-    public Emp(java.lang.Integer empId, String empName, java.lang.Integer deptId, String descript, java.lang.Integer empCode, Date createDate) {
-        this.empId = empId;
-        this.empName = empName;
-        this.deptId = deptId;
-        this.empCode = empCode;
-        this.descript = descript;
-        this.createDate = createDate;
-    }
-
     public int getEmpId(Session s) {
         return empId;
     }
 
-    public void setEmpId(int empId, Session s) throws CannotAccessToLockedRecord {
+    public void setEmpId(int empId, Session s) {
         this.empId = empId;
     }
 
@@ -86,7 +66,7 @@ public class Emp {
         return empName;
     }
 
-    public void setEmpName(String empName, Session s) throws CannotAccessToLockedRecord {
+    public void setEmpName(String empName, Session s) {
         this.empName = empName;
     }
 
@@ -94,23 +74,15 @@ public class Emp {
         return deptId;
     }
 
-    public void setDeptId(int deptId, Session s) throws CannotAccessToLockedRecord {
+    public void setDeptId(int deptId, Session s) {
         this.deptId = deptId;
-    }
-
-    public int getEmpCode(Session s) {
-        return empCode;
-    }
-
-    public void setEmpCode(int empCode, Session s) throws CannotAccessToLockedRecord {
-        this.empCode = empCode;
     }
 
     public String getDescript(Session s) {
         return descript;
     }
 
-    public void setDescript(String descript, Session s) throws CannotAccessToLockedRecord {
+    public void setDescript(String descript, Session s) {
         this.descript = descript;
     }
 
@@ -118,7 +90,7 @@ public class Emp {
         return createDate;
     }
 
-    public void setCreateDate(Date createDate, Session s) throws CannotAccessToLockedRecord {
+    public void setCreateDate(Date createDate, Session s) {
         this.createDate = createDate;
     }
 
